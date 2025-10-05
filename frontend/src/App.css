@@ -1,0 +1,125 @@
+:root {
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+
+  color-scheme: light dark;
+  color: rgba(255, 255, 255, 0.87);
+  background-color: #242424;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  margin: 0;
+  display: flex;
+  place-items: center;
+  min-width: 320px;
+  min-height: 100vh;
+}
+
+#root {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+  width: 100%;
+}
+
+.app-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    align-items: center;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #333;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+h1 {
+    font-size: 2.5em;
+    line-height: 1.1;
+    color: #4CAF50;
+    margin-bottom: 20px;
+}
+
+.error-message {
+    color: #ff6b6b;
+    background-color: #440000;
+    padding: 10px 15px;
+    border-radius: 5px;
+    border: 1px solid #ff6b6b;
+    margin-bottom: 15px;
+}
+
+/* General button styling */
+button {
+    border-radius: 8px;
+    border: 1px solid transparent;
+    padding: 0.6em 1.2em;
+    font-size: 1em;
+    font-weight: 500;
+    font-family: inherit;
+    background-color: #1a1a1a;
+    cursor: pointer;
+    transition: border-color 0.25s;
+    color: white;
+}
+button:hover {
+    border-color: #646cff;
+}
+button:focus,
+button:focus-visible {
+    outline: 4px auto -webkit-focus-ring-color;
+}
+button:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+/* Specific button styles */
+.function-form button {
+    background-color: #4CAF50;
+    border-color: #4CAF50;
+}
+.function-form button:hover {
+    background-color: #45a049;
+    border-color: #45a049;
+}
+
+.save-button {
+    background-color: #2196F3 !important;
+    border-color: #2196F3 !important;
+}
+.save-button:hover {
+    background-color: #0b7dda !important;
+    border-color: #0b7dda !important;
+}
+
+.plot-again-button {
+    background-color: #008CBA !important;
+    border-color: #008CBA !important;
+    font-size: 0.9em;
+    padding: 0.4em 0.8em;
+}
+.plot-again-button:hover {
+    background-color: #007bb5 !important;
+    border-color: #007bb5 !important;
+}
+
+.delete-button {
+    background-color: #f44336 !important;
+    border-color: #f44336 !important;
+    font-size: 0.9em;
+    padding: 0.4em 0.8em;
+}
+.delete-button:hover {
+    background-color: #da190b !important;
+    border-color: #da190b !important;
+}

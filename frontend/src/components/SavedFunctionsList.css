@@ -1,0 +1,95 @@
+.saved-functions-list {
+    background-color: #282c34;
+    padding: 25px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    width: 100%;
+    max-width: 800px;
+    box-sizing: border-box;
+    margin-top: 20px;
+}
+
+.saved-functions-list h2 {
+    color: #61dafb;
+    margin-top: 0;
+    margin-bottom: 20px;
+}
+
+.saved-functions-list ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.saved-function-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #1e1e1e;
+    border: 1px solid #444;
+    border-radius: 5px;
+    padding: 15px;
+    margin-bottom: 10px;
+    flex-wrap: wrap; /* Allow wrapping on smaller screens */
+    gap: 10px; /* Space between elements when wrapped */
+}
+
+.function-details {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    flex-grow: 1; /* Allows details to take up available space */
+}
+
+.function-details strong {
+    color: #e0e0e0;
+    font-size: 1.1em;
+    margin-bottom: 5px;
+}
+
+.function-details span {
+    color: #a0a0a0;
+    font-size: 0.9em;
+}
+
+.function-details .saved-date {
+    font-size: 0.8em;
+    color: #777;
+    margin-top: 5px;
+}
+
+
+.function-actions {
+    display: flex;
+    gap: 10px;
+    margin-left: 15px; /* Space between details and buttons */
+}
+
+/* Inherited button styles from App.css for specific classes */
+/* .plot-again-button and .delete-button styles are defined in App.css */
+
+.saved-functions-list p {
+    color: #a0a0a0;
+    text-align: center;
+    padding: 20px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 600px) {
+    .saved-function-item {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .function-details {
+        text-align: center;
+        margin-bottom: 10px;
+        align-items: center;
+    }
+
+    .function-actions {
+        width: 100%;
+        justify-content: space-around;
+        margin-left: 0;
+    }
+}

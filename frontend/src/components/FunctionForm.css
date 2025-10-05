@@ -1,0 +1,77 @@
+.function-form {
+    background-color: #282c34;
+    padding: 25px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    width: 100%;
+    max-width: 500px;
+    margin-bottom: 20px;
+    box-sizing: border-box;
+}
+
+.function-form h2 {
+    color: #61dafb;
+    margin-top: 0;
+    margin-bottom: 20px;
+}
+
+.form-group {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+    gap: 10px; /* Space between label and input */
+}
+
+.form-group label {
+    flex-basis: 80px; /* Fixed width for labels */
+    text-align: right;
+    color: #a0a0a0;
+    font-weight: bold;
+}
+
+.form-group input[type="text"],
+.form-group input[type="number"],
+.form-group select {
+    flex-grow: 1; /* Input fields take remaining space */
+    padding: 10px 12px;
+    border: 1px solid #444;
+    border-radius: 5px;
+    background-color: #1e1e1e;
+    color: #e0e0e0;
+    font-size: 1em;
+}
+
+.form-group input[type="text"]::placeholder {
+    color: #777;
+}
+
+.form-group.range-group {
+    justify-content: space-between;
+}
+
+.form-group.range-group input {
+    width: 80px; /* Specific width for range inputs */
+    flex-grow: 0;
+}
+
+.form-group.range-group span {
+    color: #a0a0a0;
+    margin: 0 5px;
+}
+
+.form-actions {
+    display: flex;
+    justify-content: flex-end; /* Align buttons to the right */
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.form-actions button {
+    padding: 10px 20px;
+    font-size: 1.1em;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    color: white;
+}
