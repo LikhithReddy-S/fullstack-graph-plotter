@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import './SavedFunctionsList.css';
+import './SavedFunctionsList.css'; // Existing CSS
 
 function SavedFunctionsList({ apiBaseUrl, onPlotAgain, onDelete }) {
     const [savedFunctions, setSavedFunctions] = useState([]);
@@ -31,19 +31,18 @@ function SavedFunctionsList({ apiBaseUrl, onPlotAgain, onDelete }) {
     const handleDeleteClick = async (id) => {
         if (window.confirm('Are you sure you want to delete this function?')) {
             await onDelete(id);
-            // After successful deletion, re-fetch the list to update UI
-            fetchSavedFunctions();
+            fetchSavedFunctions(); // Re-fetch after deletion
         }
     };
 
     const handlePlotAgainClick = (func) => {
-        onPlotAgain(func.expression, [func.range_start, func.range_end], func.step);
-        // Optionally scroll to top or graph area after plotting
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        // Now calling onPlotAgain from App.jsx, which handles adding to plot list
+        onPlotAgain(func);
+        window.scrollTo({ top: 0, behavior: 'smooth' }); // Scroll to top for graph visibility
     };
 
     if (loading) {
-        return <div className="saved-functions-list">Loading saved functions...</div>;
+        return <div className="saved-functions-list loading-message">Loading saved functions...</div>;
     }
 
     if (error) {

@@ -1,7 +1,7 @@
 import React, { useRef, useEffect } from 'react';
 import './FunctionGraph.css';
 
-function FunctionGraph({ points, funcExpression }) {
+function FunctionGraph({ graphData, viewport }) {
     const canvasRef = useRef(null);
 
     useEffect(() => {
@@ -9,68 +9,53 @@ function FunctionGraph({ points, funcExpression }) {
         if (!canvas) return;
 
         const ctx = canvas.getContext('2d');
-        const DPR = window.devicePixelRatio || 1; // Get device pixel ratio
+        const DPR = window.devicePixelRatio || 1;
 
-        // Adjust canvas dimensions for high-DPI screens
-        const canvasWidth = canvas.offsetWidth; // Get CSS dimensions
+        // Get CSS dimensions and set canvas pixel dimensions
+        const canvasWidth = canvas.offsetWidth;
         const canvasHeight = canvas.offsetHeight;
         canvas.width = canvasWidth * DPR;
         canvas.height = canvasHeight * DPR;
-        ctx.scale(DPR, DPR); // Scale context to match CSS dimensions
+        ctx.scale(DPR, DPR);
 
         ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+        ctx.save(); // Save the initial state of the context
 
-        if (points.length === 0) {
+        if (graphData.length === 0) {
             ctx.fillStyle = '#ccc';
-            ctx.font = '16px Arial';
+            ctx.font = '20px "Segoe UI", Arial';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
-            ctx.fillText('Plot function to see graph', canvasWidth / 2, canvasHeight / 2);
+            ctx.fillText('No functions plotted. Add one above!', canvasWidth / 2, canvasHeight / 2);
+            ctx.restore();
             return;
         }
 
-        // Determine min/max X and Y values from points
-        let minX = Infinity, maxX = -Infinity;
-        let minY = Infinity, maxY = -Infinity;
+        const { xMin, xMax, yMin, yMax } = viewport;
 
-        points.forEach(([x, y]) => {
-            if (x < minX) minX = x;
-            if (x > maxX) maxX = x;
-            if (y < minY) minY = y;
-            if (y > maxY) maxY = y;
-        });
-
-        // Add some padding to the view
-        const paddingX = (maxX - minX) * 0.1 || 1; // At least 1 if range is zero
-        const paddingY = (maxY - minY) * 0.1 || 1;
-        minX -= paddingX;
-        maxX += paddingX;
-        minY -= paddingY;
-        maxY += paddingY;
-
-        // Ensure a minimum range if all points are very close
-        if (maxX - minX < 0.1) {
-            maxX += 0.05;
-            minX -= 0.05;
-        }
-        if (maxY - minY < 0.1) {
-            maxY += 0.05;
-            minY -= 0.05;
+        // Ensure valid viewport ranges
+        if (xMax <= xMin || yMax <= yMin) {
+            ctx.fillStyle = '#ff6b6b';
+            ctx.font = '18px "Segoe UI", Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('Invalid viewport range. Reset or adjust.', canvasWidth / 2, canvasHeight / 2);
+            ctx.restore();
+            return;
         }
 
-
-        // Calculate scaling factors
-        const scaleX = canvasWidth / (maxX - minX);
-        const scaleY = canvasHeight / (maxY - minY);
+        // Calculate scaling factors based on viewport
+        const scaleX = canvasWidth / (xMax - xMin);
+        const scaleY = canvasHeight / (yMax - yMin);
 
         // Function to transform graph coordinates to canvas coordinates
-        const toCanvasX = (x) => (x - minX) * scaleX;
-        const toCanvasY = (y) => canvasHeight - (y - minY) * scaleY; // Invert Y-axis for canvas
+        const toCanvasX = (x) => (x - xMin) * scaleX;
+        const toCanvasY = (y) => canvasHeight - (y - yMin) * scaleY; // Invert Y-axis for canvas
 
         // --- Draw Grid and Axes ---
-        ctx.strokeStyle = '#555'; // Grid color
+        ctx.strokeStyle = '#3a3a3a'; // Grid color
         ctx.lineWidth = 0.5;
-        ctx.font = '10px Arial';
+        ctx.font = '10px "Segoe UI", Arial';
         ctx.fillStyle = '#aaa';
 
         // Draw X-axis
@@ -80,6 +65,14 @@ function FunctionGraph({ points, funcExpression }) {
             ctx.moveTo(0, xAxisY);
             ctx.lineTo(canvasWidth, xAxisY);
             ctx.stroke();
+            // Draw X-axis arrow (simple)
+            ctx.beginPath();
+            ctx.moveTo(canvasWidth, xAxisY);
+            ctx.lineTo(canvasWidth - 8, xAxisY - 4);
+            ctx.moveTo(canvasWidth, xAxisY);
+            ctx.lineTo(canvasWidth - 8, xAxisY + 4);
+            ctx.stroke();
+            ctx.fillText('X', canvasWidth - 15, xAxisY + (xAxisY > canvasHeight - 20 ? -15 : 15));
         }
 
         // Draw Y-axis
@@ -89,86 +82,134 @@ function FunctionGraph({ points, funcExpression }) {
             ctx.moveTo(yAxisX, 0);
             ctx.lineTo(yAxisX, canvasHeight);
             ctx.stroke();
+            // Draw Y-axis arrow (simple)
+            ctx.beginPath();
+            ctx.moveTo(yAxisX, 0);
+            ctx.lineTo(yAxisX - 4, 8);
+            ctx.moveTo(yAxisX, 0);
+            ctx.lineTo(yAxisX + 4, 8);
+            ctx.stroke();
+            ctx.fillText('Y', yAxisX + (yAxisX > canvasWidth - 20 ? -15 : 5), 15);
         }
 
-        // Draw grid lines and labels (simplified for brevity)
-        // You can add more sophisticated grid/label drawing here if needed
-        const drawGridLine = (val, isXAxis) => {
-            if (isXAxis) {
-                const x = toCanvasX(val);
-                ctx.beginPath();
-                ctx.moveTo(x, 0);
-                ctx.lineTo(x, canvasHeight);
-                ctx.stroke();
-                // Label for x-axis (can be optimized for spacing)
-                if (xAxisY >= 0 && xAxisY <= canvasHeight) {
-                    ctx.fillText(val.toFixed(1), x, xAxisY + 15);
-                } else {
-                     ctx.fillText(val.toFixed(1), x, canvasHeight - 5);
-                }
+        // --- Draw Grid Lines and Labels ---
+        const drawGridAndLabels = (start, end, scale, isXAxis) => {
+            const stepMajor = calculateGridStep(start, end);
+            const stepMinor = stepMajor / 5; // Smaller steps for finer grid
 
-            } else {
-                const y = toCanvasY(val);
+            for (let val = start; val <= end; val += stepMinor) {
+                if (val > end) break; // Prevent overshooting due to float precision
+                const canvasCoord = isXAxis ? toCanvasX(val) : toCanvasY(val);
                 ctx.beginPath();
-                ctx.moveTo(0, y);
-                ctx.lineTo(canvasWidth, y);
-                ctx.stroke();
-                // Label for y-axis
-                if (yAxisX >= 0 && yAxisX <= canvasWidth) {
-                     ctx.fillText(val.toFixed(1), yAxisX - 25, y);
-                } else {
-                    ctx.fillText(val.toFixed(1), 5, y);
+                ctx.strokeStyle = '#333'; // Minor grid color
+                ctx.lineWidth = 0.2;
+                if (Math.abs(val % stepMajor) < stepMinor / 2 || stepMajor < 0.001) { // Check for major grid line
+                    ctx.strokeStyle = '#444'; // Major grid color
+                    ctx.lineWidth = 0.5;
+                    ctx.fillStyle = '#aaa';
+                    ctx.font = '10px "Segoe UI", Arial';
+
+                    let label = val.toFixed(getDecimalPlaces(stepMajor));
+                    if (Math.abs(val) < Number.EPSILON * 10) label = '0'; // Handle -0.0 vs 0.0
+
+                    if (isXAxis) {
+                        if (canvasCoord >= 0 && canvasCoord <= canvasWidth && Math.abs(canvasCoord - yAxisX) > 10) {
+                            ctx.fillText(label, canvasCoord, xAxisY + (xAxisY > canvasHeight - 20 ? -15 : 15));
+                        }
+                    } else {
+                        if (canvasCoord >= 0 && canvasCoord <= canvasHeight && Math.abs(canvasCoord - xAxisY) > 10) {
+                            ctx.fillText(label, yAxisX + (yAxisX > canvasWidth - 20 ? -30 : 5), canvasCoord);
+                        }
+                    }
                 }
+                if (isXAxis) {
+                    ctx.moveTo(canvasCoord, 0);
+                    ctx.lineTo(canvasCoord, canvasHeight);
+                } else {
+                    ctx.moveTo(0, canvasCoord);
+                    ctx.lineTo(canvasWidth, canvasCoord);
+                }
+                ctx.stroke();
             }
         };
 
-        // Example: Draw major grid lines at intervals (adjust as needed)
-        for (let x = Math.ceil(minX); x <= Math.floor(maxX); x += 1) {
-            drawGridLine(x, true);
-        }
-        for (let y = Math.ceil(minY); y <= Math.floor(maxY); y += 1) {
-            drawGridLine(y, false);
-        }
+        drawGridAndLabels(xMin, xMax, scaleX, true);
+        drawGridAndLabels(yMin, yMax, scaleY, false);
 
-        // --- Draw Function Plot ---
-        ctx.beginPath();
-        ctx.strokeStyle = '#61dafb'; // Function line color
-        ctx.lineWidth = 2;
 
-        points.forEach(([x, y], index) => {
-            const canvasX = toCanvasX(x);
-            const canvasY = toCanvasY(y);
+        // --- Draw Function Plots ---
+        graphData.forEach(func => {
+            ctx.beginPath();
+            ctx.strokeStyle = func.color;
+            ctx.lineWidth = 2;
 
-            // Only draw if point is within canvas bounds
-            if (canvasX >= -50 && canvasX <= canvasWidth + 50 &&
-                canvasY >= -50 && canvasY <= canvasHeight + 50) // Allow slight overflow
-            {
-                if (index === 0) {
-                    ctx.moveTo(canvasX, canvasY);
-                } else {
-                    ctx.lineTo(canvasX, canvasY);
+            let firstPoint = true;
+            func.points.forEach(([x, y]) => {
+                const canvasX = toCanvasX(x);
+                const canvasY = toCanvasY(y);
+
+                // Only draw if the point is somewhat within the current viewport (with margin)
+                if (canvasX >= -100 && canvasX <= canvasWidth + 100 &&
+                    canvasY >= -100 && canvasY <= canvasHeight + 100)
+                {
+                    if (firstPoint) {
+                        ctx.moveTo(canvasX, canvasY);
+                        firstPoint = false;
+                    } else {
+                        ctx.lineTo(canvasX, canvasY);
+                    }
+                } else if (!firstPoint) {
+                    // If the current point is off-screen but we were drawing,
+                    // stroke the current segment and then lift the pen.
+                    ctx.stroke();
+                    ctx.beginPath();
+                    firstPoint = true; // Reset for next on-screen segment
                 }
-            } else if (index > 0) {
-                // If the previous point was on-screen but current is off, draw a segment
-                // If current point is off-screen, lift the pen
-                ctx.stroke();
-                ctx.beginPath();
-            }
+            });
+            ctx.stroke();
         });
-        ctx.stroke();
 
-        // Display function expression
-        ctx.fillStyle = '#61dafb';
-        ctx.font = '14px Arial';
+        // Display function expressions as a legend
+        ctx.fillStyle = '#e0e0e0';
+        ctx.font = '14px "Segoe UI", Arial';
         ctx.textAlign = 'left';
         ctx.textBaseline = 'top';
-        ctx.fillText(`f(x) = ${funcExpression}`, 10, 10);
+        graphData.forEach((func, index) => {
+            ctx.fillStyle = func.color; // Use function's color for its legend entry
+            ctx.fillText(`f${index + 1}(x) = ${func.expression}`, 10, 10 + index * 20);
+        });
 
-    }, [points, funcExpression]); // Re-draw when points or expression changes
+        ctx.restore(); // Restore context to its initial state
+    }, [graphData, viewport]); // Re-draw when graphData or viewport changes
+
+
+    // Helper functions for grid step calculation (no external libraries)
+    function calculateGridStep(min, max) {
+        const range = max - min;
+        if (range <= 0) return 1;
+
+        const niceNumbers = [1, 2, 5];
+        let exponent = Math.floor(Math.log10(range / 5)); // Aim for about 5-10 major grid lines
+        let fraction = range / (Math.pow(10, exponent));
+
+        let step = 1;
+        for (let i = 0; i < niceNumbers.length; i++) {
+            if (fraction / niceNumbers[i] <= 10) {
+                step = niceNumbers[i];
+                break;
+            }
+        }
+        return step * Math.pow(10, exponent);
+    }
+
+    function getDecimalPlaces(num) {
+        if (Math.floor(num) === num) return 0;
+        return num.toString().split('.')[1]?.length || 0;
+    }
+
 
     return (
         <div className="function-graph-container">
-            <h2>Graph Area</h2>
             <canvas ref={canvasRef} className="function-canvas"></canvas>
         </div>
     );

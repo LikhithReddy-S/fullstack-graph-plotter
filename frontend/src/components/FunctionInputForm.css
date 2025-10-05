@@ -1,0 +1,75 @@
+.function-input-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px; /* Spacing between form groups */
+}
+
+/* Use flex-group styles defined in App.css */
+.flex-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.flex-group label {
+    flex-shrink: 0;
+    min-width: 80px; /* Adjust label width for this form */
+    text-align: right;
+    color: #a0a0a0;
+    font-weight: bold;
+}
+
+.flex-group input[type="text"],
+.flex-group input[type="number"],
+.flex-group select {
+    flex-grow: 1;
+    padding: 10px 12px;
+    border: 1px solid #555;
+    border-radius: 5px;
+    background-color: #1e1e1e;
+    color: #e0e0e0;
+    font-size: 1em;
+}
+
+.flex-group input[type="text"]::placeholder {
+    color: #777;
+}
+
+.flex-group input[type="color"] {
+    width: 50px; /* Fixed width for color picker */
+    height: 38px;
+    padding: 2px;
+    border: 1px solid #555;
+    border-radius: 5px;
+    background-color: #1e1e1e; /* Background behind the color swatch */
+}
+
+.flex-group input[type="color"]::-webkit-color-swatch-wrapper {
+    padding: 0;
+}
+.flex-group input[type="color"]::-webkit-color-swatch {
+    border: none;
+    border-radius: 3px;
+}
+.flex-group input[type="color"]::-moz-color-swatch {
+    border: none;
+    border-radius: 3px;
+}
+
+.flex-group .range-inputs {
+    display: flex;
+    gap: 5px;
+    flex-grow: 1;
+}
+
+.flex-group .range-inputs input {
+    flex-basis: 0;
+    flex-grow: 1;
+}
+
+.function-form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 15px;
+    margin-top: 10px;
+}
